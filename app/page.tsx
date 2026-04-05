@@ -1,65 +1,266 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useCallback, useRef, useEffect } from "react";
+import { UrlInput } from "@/components/url-input";
+import { MediaPreview } from "@/components/media-preview";
+import { FormatSelector } from "@/components/format-selector";
+import { DownloadCard } from "@/components/download-card";
+import { ArrowDownToLineIcon, Loader2Icon } from "lucide-react";
+import { Toaster, toast } from "sonner";
+
+interface VideoInfo {
+  title: string;
+  thumbnail: string | null;
+  duration: number | null;
+  durationString: string | null;
+  platform: string;
+  url: string;
+}
+
+interface ActiveDownload {
+  id: string;
+  title: string;
+  format: string;
+  status: string;
+  progress: number;
+  error: string | null;
+  fileSize: number | null;
+}
 
 export default function Home() {
+  const [url, setUrl] = useState("");
+  const [videoInfo, setVideoInfo] = useState<VideoInfo | null>(null);
+  const [format, setFormat] = useState<"mp4" | "mp3">("mp4");
+  const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloads, setDownloads] = useState<ActiveDownload[]>([]);
+  const pollIntervals = useRef<Map<string, NodeJS.Timeout>>(new Map());
+
+  useEffect(() => {
+    return () => {
+      pollIntervals.current.forEach((interval) => clearInterval(interval));
+    };
+  }, []);
+
+  const fetchInfo = useCallback(async () => {
+    if (!url) return;
+    setLoading(true);
+    setVideoInfo(null);
+
+    try {
+      const res = await fetch("/api/info", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Failed to fetch video info");
+        return;
+      }
+
+      setVideoInfo(data);
+    } catch {
+      toast.error("Failed to connect to server");
+    } finally {
+      setLoading(false);
+    }
+  }, [url]);
+
+  const pollStatus = useCallback((jobId: string) => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/download/${jobId}`);
+        const data = await res.json();
+
+        setDownloads((prev) =>
+          prev.map((d) =>
+            d.id === jobId
+              ? {
+                  ...d,
+                  status: data.status,
+                  progress: data.progress,
+                  error: data.error,
+                  fileSize: data.fileSize,
+                }
+              : d
+          )
+        );
+
+        if (data.status === "complete") {
+          clearInterval(interval);
+          pollIntervals.current.delete(jobId);
+          const link = document.createElement("a");
+          link.href = `/api/download/${jobId}?file=true`;
+          link.download = "";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          toast.success("Download complete!");
+        }
+
+        if (data.status === "error") {
+          clearInterval(interval);
+          pollIntervals.current.delete(jobId);
+          toast.error(data.error || "Download failed");
+        }
+      } catch {
+        // ignore poll errors
+      }
+    }, 1000);
+
+    pollIntervals.current.set(jobId, interval);
+  }, []);
+
+  const startDownload = useCallback(async () => {
+    if (!videoInfo) return;
+    setDownloading(true);
+
+    try {
+      const res = await fetch("/api/download", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          url: videoInfo.url,
+          format,
+          title: videoInfo.title,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Failed to start download");
+        return;
+      }
+
+      const newDownload: ActiveDownload = {
+        id: data.id,
+        title: videoInfo.title,
+        format,
+        status: "downloading",
+        progress: 0,
+        error: null,
+        fileSize: null,
+      };
+
+      setDownloads((prev) => [newDownload, ...prev]);
+      pollStatus(data.id);
+
+      setVideoInfo(null);
+      setUrl("");
+    } catch {
+      toast.error("Failed to connect to server");
+    } finally {
+      setDownloading(false);
+    }
+  }, [videoInfo, format, pollStatus]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <div className="flex flex-col items-center min-h-screen">
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: "var(--background)",
+            border: "1px solid var(--border)",
+            color: "var(--foreground)",
+            fontSize: "13px",
+          },
+        }}
+      />
+
+      <div className="w-full max-w-lg px-6 pt-[20vh]">
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
+            SaveIt
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="mt-1 text-[15px] text-muted-foreground">
+            Download video or audio from any link.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* URL Input */}
+        <div className="space-y-5">
+          <UrlInput
+            value={url}
+            onChange={setUrl}
+            onSubmit={fetchInfo}
+            loading={loading}
+            disabled={loading}
+          />
+
+          {/* Loading skeleton */}
+          {loading && (
+            <div className="flex gap-4 rounded-xl border border-border p-3 animate-pulse">
+              <div className="w-36 h-[82px] rounded-lg bg-muted" />
+              <div className="flex-1 space-y-2 py-2">
+                <div className="h-3.5 w-3/4 rounded bg-muted" />
+                <div className="h-3 w-1/3 rounded bg-muted" />
+              </div>
+            </div>
+          )}
+
+          {/* Video Preview + Controls */}
+          {videoInfo && !loading && (
+            <div className="space-y-3 animate-in fade-in duration-200">
+              <MediaPreview
+                title={videoInfo.title}
+                thumbnail={videoInfo.thumbnail}
+                duration={videoInfo.durationString}
+                platform={videoInfo.platform}
+              />
+
+              <FormatSelector value={format} onChange={setFormat} />
+
+              <button
+                onClick={startDownload}
+                disabled={downloading}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-foreground py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-80 disabled:opacity-40"
+              >
+                {downloading ? (
+                  <Loader2Icon className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    <ArrowDownToLineIcon className="h-3.5 w-3.5" />
+                    Download {format === "mp4" ? "Video" : "Audio"}
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
-      </main>
+
+        {/* Active Downloads */}
+        {downloads.length > 0 && (
+          <div className="mt-10">
+            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+              Downloads
+            </p>
+            <div className="space-y-2">
+              {downloads.map((dl) => (
+                <DownloadCard
+                  key={dl.id}
+                  title={dl.title}
+                  format={dl.format}
+                  status={dl.status}
+                  progress={dl.progress}
+                  error={dl.error}
+                  fileSize={dl.fileSize}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer */}
+        <div className="mt-16 pb-8">
+          <p className="text-[11px] text-muted-foreground/50">
+            Powered by yt-dlp &middot; Supports 1000+ sites
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

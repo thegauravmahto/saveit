@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SaveIt
 
-## Getting Started
+Self-hosted video and audio downloader with a clean web UI. Paste links from YouTube, TikTok, Instagram, Twitter/X, and 1000+ other sites — download as MP4 or MP3.
 
-First, run the development server:
+## Features
+
+- Paste any video/audio URL and download it
+- MP4 (video) or MP3 (audio) format selection
+- Live download progress tracking
+- Auto-detects platform (YouTube, TikTok, Instagram, X, Reddit, etc.)
+- Thumbnail preview with video metadata
+- Minimal, responsive UI built with shadcn/ui
+- Docker-ready for self-hosting
+
+## Prerequisites
+
+- Node.js 20+
+- [yt-dlp](https://github.com/yt-dlp/yt-dlp) installed and in PATH
+- [ffmpeg](https://ffmpeg.org/) installed (for audio extraction and merging)
+
+## Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Docker
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+docker compose up -d
+```
 
-## Learn More
+Builds an image with yt-dlp and ffmpeg pre-installed. Access at `http://localhost:3000`.
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Next.js 16** — App Router, API routes, TypeScript
+- **shadcn/ui** — Minimal component library
+- **Tailwind CSS v4** — Styling
+- **yt-dlp** — Download engine (1000+ supported sites)
+- **ffmpeg** — Audio extraction and format conversion
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## How It Works
 
-## Deploy on Vercel
+1. Paste a URL — app calls `yt-dlp --dump-json` to fetch metadata
+2. Choose MP4 or MP3, click Download
+3. Backend spawns `yt-dlp` with appropriate flags
+4. Frontend polls for progress, auto-downloads when complete
+5. Files are cleaned up after 10 minutes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT

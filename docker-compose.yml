@@ -1,0 +1,11 @@
+services:
+  saveit:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - downloads:/tmp/saveit
+    restart: unless-stopped
+
+volumes:
+  downloads:
