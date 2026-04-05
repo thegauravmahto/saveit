@@ -157,15 +157,16 @@ export default function Home() {
   }, [videoInfo, format, pollStatus]);
 
   return (
-    <div className="flex flex-col items-center min-h-screen">
+    <div className="flex flex-col items-center min-h-screen bg-[#08090a]">
       <Toaster
         position="top-center"
         toastOptions={{
           style: {
-            background: "var(--background)",
-            border: "1px solid var(--border)",
-            color: "var(--foreground)",
+            background: "#191a1b",
+            border: "1px solid rgba(255,255,255,0.08)",
+            color: "#f7f8f8",
             fontSize: "13px",
+            fontWeight: 510,
           },
         }}
       />
@@ -173,16 +174,16 @@ export default function Home() {
       <div className="w-full max-w-lg px-6 pt-[20vh]">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-[28px] font-semibold tracking-tight text-foreground">
+          <h1 className="text-[32px] font-[510] tracking-[-0.704px] text-[#f7f8f8]">
             SaveIt
           </h1>
-          <p className="mt-1 text-[15px] text-muted-foreground">
+          <p className="mt-1.5 text-[15px] font-[410] tracking-[-0.165px] text-[#8a8f98]">
             Download video or audio from any link.
           </p>
         </div>
 
         {/* URL Input */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           <UrlInput
             value={url}
             onChange={setUrl}
@@ -193,11 +194,11 @@ export default function Home() {
 
           {/* Loading skeleton */}
           {loading && (
-            <div className="flex gap-4 rounded-xl border border-border p-3 animate-pulse">
-              <div className="w-36 h-[82px] rounded-lg bg-muted" />
-              <div className="flex-1 space-y-2 py-2">
-                <div className="h-3.5 w-3/4 rounded bg-muted" />
-                <div className="h-3 w-1/3 rounded bg-muted" />
+            <div className="flex gap-4 rounded-lg border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] p-3 animate-pulse">
+              <div className="w-36 h-[82px] rounded-md bg-[rgba(255,255,255,0.05)]" />
+              <div className="flex-1 space-y-2.5 py-2">
+                <div className="h-3.5 w-3/4 rounded bg-[rgba(255,255,255,0.05)]" />
+                <div className="h-3 w-1/3 rounded bg-[rgba(255,255,255,0.03)]" />
               </div>
             </div>
           )}
@@ -217,7 +218,7 @@ export default function Home() {
               <button
                 onClick={startDownload}
                 disabled={downloading}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-foreground py-2.5 text-sm font-medium text-background transition-opacity hover:opacity-80 disabled:opacity-40"
+                className="flex w-full items-center justify-center gap-2 rounded-md bg-[#5e6ad2] py-2.5 text-[13px] font-[510] tracking-[-0.13px] text-white transition-all hover:bg-[#828fff] disabled:opacity-40 disabled:hover:bg-[#5e6ad2]"
               >
                 {downloading ? (
                   <Loader2Icon className="h-4 w-4 animate-spin" />
@@ -235,7 +236,7 @@ export default function Home() {
         {/* Active Downloads */}
         {downloads.length > 0 && (
           <div className="mt-10">
-            <p className="mb-3 text-xs font-medium uppercase tracking-wider text-muted-foreground/70">
+            <p className="mb-3 text-[11px] font-[510] uppercase tracking-[0.5px] text-[#62666d]">
               Downloads
             </p>
             <div className="space-y-2">
@@ -256,7 +257,7 @@ export default function Home() {
 
         {/* Footer */}
         <div className="mt-16 pb-8">
-          <p className="text-[11px] text-muted-foreground/50">
+          <p className="text-[11px] font-[410] text-[#62666d]/60">
             Powered by yt-dlp &middot; Supports 1000+ sites
           </p>
         </div>

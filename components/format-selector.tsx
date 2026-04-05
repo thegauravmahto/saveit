@@ -1,7 +1,6 @@
 "use client";
 
 import { FilmIcon, MusicIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface FormatSelectorProps {
   value: "mp4" | "mp3";
@@ -13,24 +12,22 @@ export function FormatSelector({ value, onChange }: FormatSelectorProps) {
     <div className="flex gap-2">
       <button
         onClick={() => onChange("mp4")}
-        className={cn(
-          "flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-150",
+        className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-[13px] font-[510] tracking-[-0.13px] transition-all duration-150 ${
           value === "mp4"
-            ? "border-foreground/15 bg-foreground text-background"
-            : "border-border bg-transparent text-muted-foreground hover:border-foreground/15 hover:text-foreground"
-        )}
+            ? "border-[#5e6ad2]/40 bg-[#5e6ad2] text-white"
+            : "border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] text-[#8a8f98] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#d0d6e0]"
+        }`}
       >
         <FilmIcon className="h-3.5 w-3.5" />
         Video
       </button>
       <button
         onClick={() => onChange("mp3")}
-        className={cn(
-          "flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-all duration-150",
+        className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-4 py-2.5 text-[13px] font-[510] tracking-[-0.13px] transition-all duration-150 ${
           value === "mp3"
-            ? "border-foreground/15 bg-foreground text-background"
-            : "border-border bg-transparent text-muted-foreground hover:border-foreground/15 hover:text-foreground"
-        )}
+            ? "border-[#5e6ad2]/40 bg-[#5e6ad2] text-white"
+            : "border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.02)] text-[#8a8f98] hover:bg-[rgba(255,255,255,0.04)] hover:text-[#d0d6e0]"
+        }`}
       >
         <MusicIcon className="h-3.5 w-3.5" />
         Audio
