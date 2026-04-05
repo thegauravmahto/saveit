@@ -374,6 +374,68 @@ export default function Home() {
           </div>
         </div>
 
+        {/* About / Description */}
+        <div className="mb-16">
+          <p className="mb-6 text-[11px] font-[510] uppercase tracking-[0.5px] text-[#62666d]">
+            About SaveIt
+          </p>
+          <div className="space-y-4 text-[15px] font-[410] leading-[1.7] tracking-[-0.165px] text-[#8a8f98]">
+            <p>
+              SaveIt is a free, open-source video and audio downloader you can host on your own server. Unlike online download services that inject ads, track your activity, or throttle speeds, SaveIt runs entirely on your machine — giving you full control over your downloads and your data.
+            </p>
+            <p>
+              Powered by <span className="text-[#d0d6e0]">yt-dlp</span>, SaveIt supports downloading from over 1,000 websites including YouTube, TikTok, Instagram Reels, Twitter/X videos, Reddit clips, Twitch streams, SoundCloud tracks, and many more. Choose between <span className="text-[#d0d6e0]">MP4 video</span> at the best available quality (up to 4K) or <span className="text-[#d0d6e0]">MP3 audio</span> extraction for music, podcasts, and lectures.
+            </p>
+            <p>
+              Built with Next.js and a minimal UI inspired by Linear, SaveIt is designed to do one thing well — paste a link, pick a format, and download. No accounts, no subscriptions, no limits. Deploy it in seconds with Docker or run it locally with Node.js.
+            </p>
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="mb-16">
+          <p className="mb-6 text-[11px] font-[510] uppercase tracking-[0.5px] text-[#62666d]">
+            Frequently asked questions
+          </p>
+          <div className="space-y-0">
+            {[
+              {
+                q: "What sites does SaveIt support?",
+                a: "SaveIt supports over 1,000 websites including YouTube, TikTok, Instagram, Twitter/X, Reddit, Vimeo, Twitch, SoundCloud, Facebook, Dailymotion, Bilibili, Bandcamp, and many more. It is powered by yt-dlp, which continuously adds support for new platforms.",
+              },
+              {
+                q: "Is SaveIt free to use?",
+                a: "Yes, SaveIt is completely free and open source under the MIT license. You self-host it on your own server — there are no ads, no tracking, and no usage limits.",
+              },
+              {
+                q: "How do I install SaveIt?",
+                a: "The fastest way is Docker: run docker compose up -d and access it at localhost:3000. Alternatively, clone the repo and run npm install && npm run dev with Node.js 20+, yt-dlp, and ffmpeg installed.",
+              },
+              {
+                q: "Can I download audio only as MP3?",
+                a: "Yes. SaveIt lets you choose between MP4 video or MP3 audio-only extraction. Audio is extracted at the highest available quality using ffmpeg.",
+              },
+              {
+                q: "Does SaveIt store my downloads or data?",
+                a: "No. Downloaded files are temporarily stored on your server and automatically deleted after 10 minutes. SaveIt has no database, no user accounts, and no analytics — your data stays on your machine.",
+              },
+            ].map((item) => (
+              <details
+                key={item.q}
+                className="group border-b border-[rgba(255,255,255,0.06)] py-4 first:pt-0"
+              >
+                <summary className="flex cursor-pointer items-center justify-between text-[14px] font-[510] tracking-[-0.182px] text-[#f7f8f8] [&::-webkit-details-marker]:hidden list-none">
+                  {item.q}
+                  <span className="ml-4 shrink-0 text-[#62666d] transition-transform group-open:rotate-45">+</span>
+                </summary>
+                <p className="mt-3 text-[13px] font-[410] leading-[1.6] tracking-[-0.13px] text-[#8a8f98]">
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </div>
+
         {/* Self-host callout */}
         <div className="mb-16 rounded-lg border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.02)] p-5">
           <div className="flex items-start gap-4">
